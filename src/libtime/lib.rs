@@ -328,9 +328,7 @@ impl Tm {
         } else {
             let s = self.strftime("%Y-%m-%dT%H:%M:%S");
             let sign = if self.tm_gmtoff > 0_i32 { '+' } else { '-' };
-            let mut m = num::abs(self.tm_gmtoff) / 60_i32;
-            let h = m / 60_i32;
-            m -= h * 60_i32;
+            let (h, m) = gmtoff2hm(num::abs(self.tm_gmtoff));
             s + format!("{}{:02d}:{:02d}", sign, h as int, m as int)
         }
     }
@@ -1029,9 +1027,7 @@ pub fn strftime(format: &str, tm: &Tm) -> ~str {
           'Z' => tm.tm_zone.clone(),
           'z' => {
             let sign = if tm.tm_gmtoff > 0_i32 { '+' } else { '-' };
-            let mut m = num::abs(tm.tm_gmtoff) / 60_i32;
-            let h = m / 60_i32;
-            m -= h * 60_i32;
+            let (h, m) = gmtoff2hm(num::abs(tm.tm_gmtoff));
             format!("{}{:02d}{:02d}", sign, h, m)
           }
           '+' => tm.rfc3339(),
