@@ -336,6 +336,28 @@ impl Tm {
     }
 }
 
+#[inline]
+fn gmtoff2hm(offset: i32) -> (i32, i32) { 
+    let minutes = offset / 60_i32;
+    let hours = minutes / 60_i32;
+    (hours, minutes - hours * 60_i32)
+}
+
+impl Ord for Tm {
+    fn lt(&self, other: &Tm) -> bool {
+        let (off_h, off_m) = gmtoff2hm(self.tm_gmtoff);
+        let (off_H, off_M) = gmtoff2hm(other.tm_gmtoff);
+
+        self.tm_year <= other.tm_year
+            && self.tm_mon <= other.tm_mon
+            && self.tm_mday <= other.tm_mday
+            && self.tm_hour + off_h <= other.tm_hour + off_H
+            && self.tm_min + off_m <= other.tm_min + off_M
+            && self.tm_sec <= other.tm_sec
+            && self.tm_nsec <= other.tm_nsec
+    }
+}
+
 /// Parses the time from the string according to the format string.
 pub fn strptime(s: &str, format: &str) -> Result<Tm, ~str> {
     fn match_str(s: &str, pos: uint, needle: &str) -> bool {
