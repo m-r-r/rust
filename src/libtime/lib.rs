@@ -1483,6 +1483,32 @@ mod tests {
         assert!(d.gt(c));
     }
 
+    fn test_tm_ord() {
+        let a = &at(get_time());
+        let b = &mut a.clone();
+
+        b.tm_year -= 1;
+
+        assert!(a.gt(b));
+        assert!(b.lt(a));
+
+        b.tm_year += 1;
+        b.tm_hour += 1;
+
+        assert!(a.lt(b));
+        assert!(b.gt(a));
+
+        b.tm_gmtoff = -28800_i32;
+
+        assert!(a.lt(b));
+        assert!(b.gt(a));
+
+        b.tm_gmtoff = 3600_i32;
+
+        assert!(!a.gt(b));
+        assert!(!b.lt(a));
+    }
+
     #[test]
     #[ignore(cfg(target_os = "android"))] // FIXME #10958
     fn run_tests() {
@@ -1497,6 +1523,7 @@ mod tests {
         test_strptime();
         test_ctime();
         test_strftime();
+        test_tm_ord();
         test_timespec_eq_ord();
     }
 }
