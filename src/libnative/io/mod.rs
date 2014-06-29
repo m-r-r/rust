@@ -29,6 +29,7 @@ use std::c_str::CString;
 use std::os;
 use std::rt::rtio;
 use std::rt::rtio::{IoResult, IoError};
+use self::net::{TcpStream,UdpSocket};
 
 // Local re-exports
 pub use self::file::FileDesc;
@@ -196,6 +197,20 @@ impl rtio::IoFactory for IoFactory {
         pipe::UnixStream::connect(path, timeout).map(|s| {
             box s as Box<rtio::RtioPipe + Send>
         })
+    }
+    fn tcp_open(&mut self, sock: rtio::sock_t)
+        -> Box<rtio::RtioTcpStream + Send>
+    {
+        box TcpStream::from_raw_socket(sock) as Box<rtio::RtioTcpStream + Send>
+    }
+    fn tcp_listen(&mut self, sock: rtio::sock_t)
+        -> Box<rtio::RtioTcpListener + Send>
+    {
+        box TcpListener::from_raw_socket(sock) as Box<rtio::RtioTcpListener + Send>
+    fn udp_open(&mut self, sock: rtio::sock_t)
+        -> Box<rtio::RtioUdpSocket + Send>
+    {
+        box UdpSocket::from_raw_socket(sock) as Box<rtio::RtioUdpSocket + Send>
     }
     fn get_host_addresses(&mut self, host: Option<&str>, servname: Option<&str>,
                           hint: Option<rtio::AddrinfoHint>)

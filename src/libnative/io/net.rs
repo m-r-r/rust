@@ -305,6 +305,10 @@ impl TcpStream {
 
     pub fn fd(&self) -> sock_t { self.inner.fd }
 
+    pub fn from_raw_socket(sock: sock_t) -> TcpStream {
+        TcpStream::new(Inner::new(sock))
+    }
+
     fn set_nodelay(&mut self, nodelay: bool) -> IoResult<()> {
         setsockopt(self.fd(), libc::IPPROTO_TCP, libc::TCP_NODELAY,
                    nodelay as libc::c_int)
@@ -475,6 +479,10 @@ impl TcpListener {
 
     pub fn fd(&self) -> sock_t { self.inner.fd }
 
+    pub fn from_raw_socket(sock: sock_t) -> TcpListener {
+        TcpListener {inner: Inner::new(sock) }
+    }
+
     pub fn native_listen(self, backlog: int) -> IoResult<TcpAcceptor> {
         match unsafe { libc::listen(self.fd(), backlog as libc::c_int) } {
             -1 => Err(last_error()),
@@ -574,6 +582,14 @@ impl UdpSocket {
     }
 
     pub fn fd(&self) -> sock_t { self.inner.fd }
+
+    pub fn from_raw_socket(sock: sock_t) -> UdpSocket {
+        UdpSocket {
+            inner: Arc::new(Inner::new(sock)),
+            read_deadline: 0,
+            write_deadline: 0,
+        }
+    }
 
     pub fn set_broadcast(&mut self, on: bool) -> IoResult<()> {
         setsockopt(self.fd(), libc::SOL_SOCKET, libc::SO_BROADCAST,

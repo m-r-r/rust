@@ -163,6 +163,9 @@ pub type uv_tty_t = c_void;
 pub type uv_signal_t = c_void;
 pub type uv_shutdown_t = c_void;
 
+#[cfg(unix)]    pub type uv_os_sock_t = uv_fs_t;
+#[cfg(windows)] pub type uv_os_sock_t = libc::SOCKET;
+
 pub struct uv_timespec_t {
     pub tv_sec: libc::c_long,
     pub tv_nsec: libc::c_long
@@ -561,6 +564,7 @@ extern {
     pub fn uv_tcp_connect(c: *mut uv_connect_t, h: *mut uv_tcp_t,
                           addr: *const sockaddr, cb: uv_connect_cb) -> c_int;
     pub fn uv_tcp_bind(t: *mut uv_tcp_t, addr: *const sockaddr) -> c_int;
+    pub fn uv_tcp_open(c: *mut uv_tcp_t, sock: uv_os_sock_t) -> c_int;
     pub fn uv_tcp_nodelay(h: *mut uv_tcp_t, enable: c_int) -> c_int;
     pub fn uv_tcp_keepalive(h: *mut uv_tcp_t, enable: c_int,
                             delay: c_uint) -> c_int;
@@ -574,6 +578,7 @@ extern {
     pub fn uv_udp_init(l: *mut uv_loop_t, h: *mut uv_udp_t) -> c_int;
     pub fn uv_udp_bind(h: *mut uv_udp_t, addr: *const sockaddr,
                        flags: c_uint) -> c_int;
+    pub fn uv_udp_open(c: *mut uv_tcp_t, sock: uv_os_sock_t) -> c_int;
     pub fn uv_udp_recv_start(server: *mut uv_udp_t,
                              on_alloc: uv_alloc_cb,
                              on_recv: uv_udp_recv_cb) -> c_int;

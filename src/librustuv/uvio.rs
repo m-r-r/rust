@@ -164,6 +164,30 @@ impl IoFactory for UvIoFactory {
         }
     }
 
+    fn tcp_open(&mut self, sock: rtio::sock_t)
+        -> IoResult<Box<rtio::RtioTcpStream + Send>>
+    {
+        let ret = box TcpWatcher::new(self)
+        unsafe { uvll::uv_tcp_open(ret.handle, sock) }
+        ret as Box<rtio::RtioTcpStream + Send>
+    }
+
+    fn tcp_listen(&mut self, sock: rtio::sock_t)
+        -> IoResult<Box<rtio::RtioTcpListener + Send>>
+    {
+        let ret = box TcpWatcher::new(self)
+        unsafe { uvll::uv_tcp_open(ret.handle, sock) }
+        ret as Box<rtio::RtioTcpListener + Send>
+    }
+
+    fn udp_open(&mut self, sock: rtio::sock_t)
+        -> Box<rtio::RtioUdpSocket + Send>
+    {
+        let ret = box UdpWatcher::new(self)
+        unsafe { uvll::uv_udp_open(ret.handle, sock) }
+        ret as Box<rtio::RtioUdpSocket + Send>
+    }
+
     fn timer_init(&mut self) -> IoResult<Box<rtio::RtioTimer + Send>> {
         Ok(TimerWatcher::new(self) as Box<rtio::RtioTimer + Send>)
     }

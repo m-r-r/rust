@@ -23,6 +23,11 @@ use c_str::CString;
 use local::Local;
 use task::Task;
 
+#[allow(non_camel_case_types)]
+#[cfg(windows)] pub type sock_t = libc::SOCKET;
+#[allow(non_camel_case_types)]
+#[cfg(unix)]    pub type sock_t = libc::c_int;
+
 pub trait EventLoop {
     fn run(&mut self);
     fn callback(&mut self, arg: proc(): Send);
@@ -201,6 +206,9 @@ pub trait IoFactory {
     fn get_host_addresses(&mut self, host: Option<&str>, servname: Option<&str>,
                           hint: Option<AddrinfoHint>)
                           -> IoResult<Vec<AddrinfoInfo>>;
+    fn tcp_open(&mut self, sock: sock_t) -> Box<RtioTcpStream + Send>;
+    fn tcp_listen(&mut self, sock: sock_t) -> Box<RtioTcpListener + Send>;
+    fn udp_open(&mut self, sock: sock_t) -> Box<RtioUdpSocket + Send>;
 
     // filesystem operations
     fn fs_from_raw_fd(&mut self, fd: c_int, close: CloseBehavior)

@@ -371,6 +371,26 @@ impl TcpListener {
             n => Err(UvError(n))
         };
     }
+
+    pub fn from_raw_socket(sock: sock_t)
+                -> Result<Box<TcpListener>, UvError> {
+        let handle = unsafe { uvll::malloc_handle(uvll::UV_TCP) };
+        let (tx, rx) = channel();
+        let l = box TcpListener {
+            home: io.make_handle(),
+            handle: handle,
+            outgoing: tx,
+            incoming: rx,
+        };
+        let res = unsafe {
+            uvll::uv_tcp_open(l.handle, sock as uvll::uv_os_sock_t)
+        };
+        return match res {
+            0 => Ok(l.install()),
+            n => Err(UvError(n))
+        };
+    
+    }
 }
 
 impl HomingIO for TcpListener {
